@@ -62,50 +62,95 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Center(child: CircularProgressIndicator());
               default:
                 var listData = snapshot.data;
-                return CustomScrollView(
-                  slivers: <Widget>[
-                    SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisSpacing: 1,
-                        mainAxisSpacing: 1,
-                        crossAxisCount: _isList ? 1 : 3,
-                        childAspectRatio: _isList ? 4 : 2,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          var data = listData[index];
-                          return OpenContainer(
-                            transitionType: ContainerTransitionType.fadeThrough,
-                            openBuilder: (BuildContext context,
-                                VoidCallback openContainer) {
-                              return DetailCard(data);
-                            },
-                            transitionDuration: Duration(milliseconds: 1000),
-                            closedBuilder:
-                                (BuildContext _, VoidCallback openContainer) {
-                              return GridTile(
-                                child: Card(
-                                  color: data.color,
-                                  child: Center(
-                                    child: Text(data.title),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        addAutomaticKeepAlives: true,
-                        addRepaintBoundaries: true,
-                        addSemanticIndexes: true,
-                        childCount: listData.length,
-                      ),
-                    ),
-                  ],
+                List<Widget> pageList = <Widget>[
+                  ListPage(listData),
+                  GridPage(listData),
+                ];
+                return PageTransitionSwitcher(
+                  duration: Duration(milliseconds: 800),
+                  transitionBuilder: (
+                    Widget child,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return FadeThroughTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      child: child,
+                    );
+                  },
+                  child: pageList[_isList ? 0 : 1],
                 );
             }
           },
         ),
         floatingActionButton: FabButtonAnimations(
             AddEntryWidget(), Theme.of(context).colorScheme.primary));
+  }
+}
+
+class ListPage extends StatelessWidget {
+  final List<Data> list;
+
+  ListPage(this.list);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        final data = list[index];
+        return OpenContainer(
+            transitionType: ContainerTransitionType.fadeThrough,
+            openBuilder: (BuildContext context, VoidCallback openContainer) {
+              return DetailCard(data);
+            },
+            transitionDuration: Duration(milliseconds: 1000),
+            closedBuilder: (BuildContext _, VoidCallback openContainer) {
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: data.color,
+                  radius: 25.0,
+                ),
+                title: Text(data.title),
+                subtitle: Text(data.description),
+              );
+            });
+      },
+      itemCount: list.length,
+    );
+  }
+}
+
+class GridPage extends StatelessWidget {
+  final List<Data> list;
+
+  GridPage(this.list);
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      itemCount: list.length,
+      gridDelegate:
+          new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+      itemBuilder: (BuildContext context, int index) {
+        final data = list[index];
+        return OpenContainer(
+            transitionType: ContainerTransitionType.fadeThrough,
+            openBuilder: (BuildContext context, VoidCallback openContainer) {
+              return DetailCard(data);
+            },
+            transitionDuration: Duration(milliseconds: 1000),
+            closedBuilder: (BuildContext _, VoidCallback openContainer) {
+              return GridTile(
+                child: Card(
+                  color: data.color,
+                  child: Center(
+                    child: Text(data.title),
+                  ),
+                ),
+              );
+            });
+      },
+    );
   }
 }
