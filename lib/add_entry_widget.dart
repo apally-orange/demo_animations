@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:demo_animations/data.dart';
 import 'package:demo_animations/repo.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,13 @@ class _AddEntryWidgetState extends State<AddEntryWidget> {
   }
 
   void _openDialog() {
-    showDialog(
+    showModal<void>(
       context: context,
-      builder: (_) {
+      configuration: FadeScaleTransitionConfiguration(
+        transitionDuration: Duration(milliseconds: 800),
+        barrierColor: Colors.amberAccent,
+      ),
+      builder: (BuildContext context) {
         return AlertDialog(
           contentPadding: const EdgeInsets.all(6.0),
           title: Text("Choose color"),
